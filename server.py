@@ -16,10 +16,11 @@ def login():
         username = str(request.form['username'])
         password = str(request.form['password'])
         if not db.userExists(username, password):
-            return 'wrong something'
+            return {'success': 'no', 'error' : 'wrong username or password'}
         session['username'] = username
         session['password'] = password
-        return redirect(url_for('index'))
+        return {'success': 'yes', 'error' : 'null', 'username' : username, 'password' : password }
+        # return redirect(url_for('index'))
     return '''
         <form method="post">
             <p><input type=text name=username>
@@ -34,11 +35,12 @@ def register():
         username = str(request.form['username'])
         password = str(request.form['password'])
         if db.loginExists(username):
-            return 'user already exists'
+            return {'success': 'no', 'error' : 'user already exists'}
         session['username'] = username
         session['password'] = password
         db.createUser(username, password)
-        return redirect(url_for('index'))
+        return {'success': 'yes', 'error' : 'null', 'username' : username, 'password' : password }
+        # return redirect(url_for('index'))
     return '''
         <form method="post">
             <p><input type=text name=username>
