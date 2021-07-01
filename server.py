@@ -20,7 +20,7 @@ def login():
         session['username'] = username
         session['password'] = password
         
-        return {"success": True, "error" : None, "username" : username, "password" : password })
+        return {"success": True, "error" : 'null', "username" : username, "password" : password })
         # return redirect(url_for('index'))
     return '''
         <form method="post">
@@ -41,7 +41,7 @@ def register():
         session['password'] = password
         db.createUser(username, password)
         
-        return {"success": True, "error" : None, "username" : username, "password" : password })
+        return {"success": True, "error" : 'null', "username" : username, "password" : password })
         # return redirect(url_for('index'))
     return '''
         <form method="post">
