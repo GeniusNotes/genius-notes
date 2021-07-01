@@ -16,16 +16,11 @@ def login():
         username = str(request.form['username'])
         password = str(request.form['password'])
         if not db.userExists(username, password):
-            return {'success': 'no', 'error' : 'wrong username or password'}
+            return {'success': False, 'error' : 'wrong username or password'}
         session['username'] = username
         session['password'] = password
         
-        response = app.response_class(
-            response=json.dumps({"success": True, "error" : "null", "username" : username, "password" : password }),
-            status=200,
-            mimetype='application/json'
-        )
-        return response
+        return {"success": True, "error" : None, "username" : username, "password" : password })
         # return redirect(url_for('index'))
     return '''
         <form method="post">
@@ -41,17 +36,12 @@ def register():
         username = str(request.form['username'])
         password = str(request.form['password'])
         if db.loginExists(username):
-            return {'success': 'no', 'error' : 'user already exists'}
+            return {'success': False, 'error' : 'user already exists'}
         session['username'] = username
         session['password'] = password
         db.createUser(username, password)
         
-        response = app.response_class(
-            response=json.dumps({"success": True, "error" : "null", "username" : username, "password" : password }),
-            status=200,
-            mimetype='application/json'
-        )
-        return response
+        return {"success": True, "error" : None, "username" : username, "password" : password })
         # return redirect(url_for('index'))
     return '''
         <form method="post">
