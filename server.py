@@ -16,7 +16,7 @@ def login():
         username = str(request.form['username'])
         password = str(request.form['password'])
         if not db.userExists(username, password):
-            return {'success': 'no', 'error' : 'wrong username or password'}
+            return {'success': False, 'error' : 'wrong username or password'}
         session['username'] = username
         session['password'] = password
         
@@ -41,7 +41,7 @@ def register():
         username = str(request.form['username'])
         password = str(request.form['password'])
         if db.loginExists(username):
-            return {'success': 'no', 'error' : 'user already exists'}
+            return {'success': False, 'error' : 'user already exists'}
         session['username'] = username
         session['password'] = password
         db.createUser(username, password)
