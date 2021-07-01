@@ -1,4 +1,4 @@
-from flask import Flask, session, request, redirect, url_for
+from flask import Flask, session, request, redirect, url_for, json
 import db
 
 app = Flask(__name__)
@@ -19,7 +19,13 @@ def login():
             return {'success': 'no', 'error' : 'wrong username or password'}
         session['username'] = username
         session['password'] = password
-        return {"success": True, "error" : "null", "username" : username, "password" : password }
+        
+        response = app.response_class(
+            response=json.dumps({"success": True, "error" : "null", "username" : username, "password" : password }),
+            status=200,
+            mimetype='application/json'
+        )
+        return response
         # return redirect(url_for('index'))
     return '''
         <form method="post">
@@ -39,7 +45,13 @@ def register():
         session['username'] = username
         session['password'] = password
         db.createUser(username, password)
-        return {"success": 'yes', "error" : 'null', "username" : username, "password" : password }
+        
+        response = app.response_class(
+            response=json.dumps({"success": True, "error" : "null", "username" : username, "password" : password }),
+            status=200,
+            mimetype='application/json'
+        )
+        return response
         # return redirect(url_for('index'))
     return '''
         <form method="post">
