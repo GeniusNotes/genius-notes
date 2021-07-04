@@ -12,8 +12,8 @@ mail = configureEmail(app)
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.data['username']
-        password = request.data['password']
+        username = request.json['username']
+        password = request.json['password']
         if not db.userExists(username, password):
             return {'success': False, 'error' : 'wrong username or password'}
         response = json.dumps({"success": True, "error" : "null", "username" : username, "password" : password })
@@ -23,8 +23,8 @@ def login():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        username = request.data['username']
-        password = request.data['password']
+        username = request.json['username']
+        password = request.json['password']
         if db.loginExists(username):
             return {'success': False, 'error' : 'user already exists'}
         db.createUser(username, password)
@@ -36,7 +36,7 @@ def register():
 def send_email():
     if request.method == 'POST':
         codeLength = 6
-        toMail = request.data['toMail']
+        toMail = request.json['toMail']
         code = utilities.getCode(codeLength)
         msg = createMessage("Your code is " + code)
         mail.send(toMail, msg)
