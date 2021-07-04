@@ -38,13 +38,6 @@ def send_email():
         codeLength = 6
         toMail = request.json['toMail']
         code = utilities.getCode(codeLength)
-        msg = createMessage("Your code is " + code)
-        mail.send(toMail, msg)
-        return json.dumps({"success": True, "code": code})
-    else:
-        codeLength = 6
-        toMail = "d.samylovskikh@gmail.com"
-        code = utilities.getCode(codeLength)
         msg = createMessage(toMail, "Your code is " + code)
         mail.send(msg)
         return json.dumps({"success": True, "code": code})
