@@ -37,7 +37,7 @@ def register():
 def createUser():
     if request.method == 'POST':
         username = request.json['username']
-        userMail = request.json['mail']
+        userMail = request.json['userMail']
         db.createUser(username, userMail)
         response = json.dumps({"success" : True})
         return response

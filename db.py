@@ -8,7 +8,11 @@ def createUser(username, userMail):
 	profiles.insert_one({'username' : username, 'mail' : userMail})
 
 def userExists(user):
-	found = profiles.find_one({'username' : username}) or profiles.find_one({'mail' : user})
+	found = profiles.find_one({'username' : user}) or profiles.find_one({'mail' : user})
+	return found != None
+
+def userOccupied(username, userMail):
+	found = profiles.find_one({'username' : username}) or profiles.find_one({'mail' : userMail})
 	return found != None
 
 def getData(user):
@@ -21,4 +25,3 @@ def getData(user):
 		username = user
 		userMail = profiles.find_one({'username' : user})['mail']
 	return username, userMail
-
