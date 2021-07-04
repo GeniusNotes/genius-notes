@@ -22,7 +22,7 @@ mail = configureEmail(app)
 
 
 @app.route('/login', methods=['GET', 'POST'])
-@checkToken
+# @checkToken
 def login():
     if request.method == 'POST':
         user = request.json['user']
@@ -35,7 +35,7 @@ def login():
     return {'success': False, 'error': 'wrong method'}
 
 @app.route('/register', methods=['GET', 'POST'])
-@checkToken
+# @checkToken
 def register():
     if request.method == 'POST':
         username = request.json['username']
@@ -48,7 +48,7 @@ def register():
     return {'success': False, 'error': 'wrong method'}
 
 @app.route('/createUser', methods=['GET', 'POST'])
-@checkToken
+# @checkToken
 def createUser():
     if request.method == 'POST':
         username = request.json['username']
