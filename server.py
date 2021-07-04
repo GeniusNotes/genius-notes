@@ -1,15 +1,28 @@
-from flask import Flask, session, request, redirect, url_for, json
+from flask import Flask, request, json
 from flask_mail import Message, Mail
 from emailFunctions import configureEmail, createMessage
 import db, utilities
 
 app = Flask(__name__)
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
-#gmail configurations
+
+# token authentication
+secretToken = "xdxdxd"
+def checkToken(func):
+    def wrapper():
+        givenToken = request.headers.get('token')
+        if givenToken != secretToken:
+            return json.dumps({"success" : False, 'error' : 'wrong token'})
+        return func()
+    return wrapper
+
+# gmail configurations
 mail = configureEmail(app)
 
 
+
 @app.route('/login', methods=['GET', 'POST'])
+@checkToken
 def login():
     if request.method == 'POST':
         user = request.json['user']
@@ -22,6 +35,7 @@ def login():
     return {'success': False, 'error': 'wrong method'}
 
 @app.route('/register', methods=['GET', 'POST'])
+@checkToken
 def register():
     if request.method == 'POST':
         username = request.json['username']
@@ -34,6 +48,7 @@ def register():
     return {'success': False, 'error': 'wrong method'}
 
 @app.route('/createUser', methods=['GET', 'POST'])
+@checkToken
 def createUser():
     if request.method == 'POST':
         username = request.json['username']
@@ -49,5 +64,6 @@ def send_email(toMail):
     msg = createMessage(toMail, "Your code is " + code)
     mail.send(msg)
     return code
+
 
 
