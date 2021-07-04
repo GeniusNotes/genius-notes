@@ -8,13 +8,6 @@ app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 # token authentication
 secretToken = "xdxdxd"
-def checkToken(func):
-    def wrapper():
-        givenToken = request.headers.get('token')
-        if givenToken != secretToken:
-            return json.dumps({"success" : False, 'error' : 'wrong token'})
-        return func()
-    return wrapper
 
 # gmail configurations
 mail = configureEmail(app)
@@ -22,9 +15,11 @@ mail = configureEmail(app)
 
 
 @app.route('/login', methods=['GET', 'POST'])
-# @checkToken
 def login():
     if request.method == 'POST':
+        headChecker = validateHeader(request)
+        if headChecker:
+            return headChecker
         user = request.json['user']
         if not db.userExists(user):
             return {'success': False, 'error' : 'wrong username or email'}
@@ -35,9 +30,11 @@ def login():
     return {'success': False, 'error': 'wrong method'}
 
 @app.route('/register', methods=['GET', 'POST'])
-# @checkToken
 def register():
     if request.method == 'POST':
+        headChecker = validateHeader(request)
+        if headChecker:
+            return headChecker
         username = request.json['username']
         userMail = request.json['userMail']
         if db.userOccupied(username, userMail):
@@ -48,9 +45,11 @@ def register():
     return {'success': False, 'error': 'wrong method'}
 
 @app.route('/createUser', methods=['GET', 'POST'])
-# @checkToken
 def createUser():
     if request.method == 'POST':
+        headChecker = validateHeader(request)
+        if headChecker:
+            return headChecker
         username = request.json['username']
         userMail = request.json['userMail']
         db.createUser(username, userMail)
@@ -65,5 +64,10 @@ def send_email(toMail):
     mail.send(msg)
     return code
 
+def validateHeader(request):
+    givenToken = request.headers.get('token')
+    if givenToken != secretToken:
+        return json.dumps({"success" : False, 'error' : 'wrong token'})
+    return False
 
 
