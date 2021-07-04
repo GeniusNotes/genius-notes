@@ -4,17 +4,21 @@ client = MongoClient("mongodb+srv://admin:admin@db.ekcwb.mongodb.net/myFirstData
 profiles = client.db.profiles
 
 
-def userExists(username, password):
-	user = profiles.find_one({'username' : username, 'password' : password})
-	if user != None:
-		return True
-	return False
+def createUser(username, userMail):
+	profiles.insert_one({'username' : username, 'mail' : userMail})
 
-def createUser(username, password):
-	profiles.insert_one({'username' : username, 'password' : password})
+def userExists(user):
+	found = profiles.find_one({'username' : username}) or profiles.find_one({'mail' : user})
+	return found != None
 
-def loginExists(username):
-	user = profiles.find_one({'username' : username})
-	if user != None:
-		return True
-	return False 
+def getData(user):
+	if '@' in user:
+		# email given; find username
+		username = profiles.find_one({'mail' : user})['username']
+		userMail = user
+	else:
+		# username given; find email
+		username = user
+		userMail = profiles.find_one({'username' : user})['mail']
+	return username, userMail
+

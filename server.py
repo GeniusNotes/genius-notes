@@ -12,11 +12,12 @@ mail = configureEmail(app)
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.json['username']
-        password = request.json['password']
-        if not db.userExists(username, password):
-            return {'success': False, 'error' : 'wrong username or password'}
-        response = json.dumps({"success": True, "error" : "null", "username" : username, "password" : password })
+        user = request.json['user']
+        if not db.userExists(user):
+            return {'success': False, 'error' : 'wrong username or email'}
+        username, userMail = db.getData(user)
+        code = send_email(userMail)
+        response = json.dumps({"success" : True, "username" : username, "mail" : userMail, "code" : code })
         return response
     return {'success': False, 'error': 'wrong method'}
 
@@ -24,21 +25,29 @@ def login():
 def register():
     if request.method == 'POST':
         username = request.json['username']
-        password = request.json['password']
-        if db.loginExists(username):
-            return {'success': False, 'error' : 'user already exists'}
-        db.createUser(username, password)
-        response = json.dumps({"success": True, "error" : "null", "username" : username, "password" : password })
+        userMail = request.json['userMail']
+        if db.userOccupied(username, userMail):
+            return {'success': False, 'error' : 'this username or email already is registered'}
+        code = send_email(userMail)
+        response = json.dumps({"success": True, "username" : username, "mail" : userMail, "code" : code})
         return response
     return {'success': False, 'error': 'wrong method'}
 
-@app.route("/send_email", methods=['GET', 'POST'])
-def send_email():
+@app.route('/createUser', methods=['GET', 'POST'])
+def createUser():
     if request.method == 'POST':
-        codeLength = 6
-        toMail = request.json['toMail']
-        code = utilities.getCode(codeLength)
-        msg = createMessage(toMail, "Your code is " + code)
-        mail.send(msg)
-        return json.dumps({"success": True, "code": code})
-    return json.dumps({"success": False, 'error': 'wrong method'})
+        username = request.json['username']
+        userMail = request.json['mail']
+        db.createUser(username, userMail)
+        response = json.dumps({"success" : True})
+        return response
+    return {'success': False, 'error': 'wrong method'}
+
+def send_email(toMail):
+    codeLength = 6
+    code = utilities.getCode(codeLength)
+    msg = createMessage(toMail, "Your code is " + code)
+    mail.send(msg)
+    return code
+
+
