@@ -1,69 +1,44 @@
 from flask import Flask, session, request, redirect, url_for, json
-import db
+from flask_mail import Message, Mail
+from emailFunctions import configureEmail, createMessage
+import db, utilities
 
 app = Flask(__name__)
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
+#gmail configurations
+mail = configureEmail(app)
 
-@app.route('/')
-def index():
-    if 'username' in session:
-        return f'Logged in as {session["username"]} with password {session["password"]}'
-    return 'You are not logged in'
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = str(request.form['username'])
-        password = str(request.form['password'])
+        username = request.data['username']
+        password = request.data['password']
         if not db.userExists(username, password):
             return {'success': False, 'error' : 'wrong username or password'}
-        session['username'] = username
-        session['password'] = password
-        
-        response = app.response_class(
-            response=json.dumps({"success": True, "error" : "null", "username" : username, "password" : password }),
-            status=200,
-            mimetype='application/json'
-        )
+        response = json.dumps({"success": True, "error" : "null", "username" : username, "password" : password })
         return response
-        # return redirect(url_for('index'))
-    return '''
-        <form method="post">
-            <p><input type=text name=username>
-            <p><input type=text name=password>
-            <p><input type=submit value=Login>
-        </form>
-    '''
+    return {'success': False, 'error': 'wrong method'}
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        username = str(request.form['username'])
-        password = str(request.form['password'])
+        username = request.data['username']
+        password = request.data['password']
         if db.loginExists(username):
             return {'success': False, 'error' : 'user already exists'}
-        session['username'] = username
-        session['password'] = password
         db.createUser(username, password)
-        
-        response = app.response_class(
-            response=json.dumps({"success": True, "error" : "null", "username" : username, "password" : password }),
-            status=200,
-            mimetype='application/json'
-        )
+        response = json.dumps({"success": True, "error" : "null", "username" : username, "password" : password })
         return response
-        # return redirect(url_for('index'))
-    return '''
-        <form method="post">
-            <p><input type=text name=username>
-            <p><input type=text name=password>
-            <p><input type=submit value=Register>
-        </form>
-    '''
+    return {'success': False, 'error': 'wrong method'}
 
-@app.route('/logout')
-def logout():
-    # remove the username from the session if it's there
-    session.pop('username', None)
-    session.pop('password', None)
-    return redirect(url_for('index'))
+@app.route("/send_email", methods=['GET', 'POST'])
+def send_email():
+    if request.method == 'POST':
+        codeLength = 6
+        toMail = request.data['toMail']
+        code = utilities.getCode(codeLength)
+        msg = createMessage("Your code is " + code)
+        mail.send(toMail, msg)
+        return json.dumps({"success": True, "code": code})
+    return json.dumps({"success": False, 'error': 'wrong method'})

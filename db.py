@@ -1,4 +1,5 @@
 from pymongo import MongoClient
+
 client = MongoClient("mongodb+srv://admin:admin@db.ekcwb.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
 profiles = client.db.profiles
 
