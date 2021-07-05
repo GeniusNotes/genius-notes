@@ -20,6 +20,7 @@ def login():
         headChecker = validateHeader(request)
         if headChecker:
             return headChecker
+
         user = request.json['user']
         if not db.userExists(user):
             return {'success': False, 'error' : 'wrong username or email'}
@@ -35,6 +36,7 @@ def register():
         headChecker = validateHeader(request)
         if headChecker:
             return headChecker
+
         username = request.json['username']
         userMail = request.json['userMail']
         if db.userOccupied(username, userMail):
@@ -50,12 +52,65 @@ def createUser():
         headChecker = validateHeader(request)
         if headChecker:
             return headChecker
+
         username = request.json['username']
         userMail = request.json['userMail']
         db.createUser(username, userMail)
         response = json.dumps({"success" : True})
         return response
     return {'success': False, 'error': 'wrong method'}
+
+@app.route('/createNote', methods=['GET', 'POST'])
+def createNote():
+    if request.method == 'POST':
+        headChecker = validateHeader(request)
+        if headChecker:
+            return headChecker
+
+        username = request.json['username']
+        noteid = db.createNote(username)
+        response = json.dumps({"success" : True, "noteId" : noteid})
+        return response
+    return {'success': False, 'error': 'wrong method'}
+
+@app.route('/deleteNote', methods=['GET', 'POST'])
+def deleteNote():
+    if request.method == 'POST':
+        headChecker = validateHeader(request)
+        if headChecker:
+            return headChecker
+
+        username = request.json['username']
+        noteid = request.json['noteid']
+        return db.deleteNote(username, noteid)
+    return {'success': False, 'error': 'wrong method'}
+
+@app.route('/modifyNote', methods=['GET', 'POST'])
+def modifyNote():
+    if request.method == 'POST':
+        headChecker = validateHeader(request)
+        if headChecker:
+            return headChecker
+
+        username = request.json['username']
+        noteid = request.json['noteid']
+        newNote = request.json['newNote']        
+        return db.modifyNote(username, noteid, newNote)
+    return {'success': False, 'error': 'wrong method'}
+
+@app.route('/getNotes', methods=['GET', 'POST'])
+def getNotes():
+    if request.method == 'POST':
+        headChecker = validateHeader(request)
+        if headChecker:
+            return headChecker
+
+        username = request.json['username']
+        notes = db.getNotes(username)
+        response = json.dumps({"success" : True, "notes" : notes})
+        return response
+    return {'success': False, 'error': 'wrong method'}
+
 
 def send_email(toMail):
     codeLength = 6

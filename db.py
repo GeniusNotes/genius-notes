@@ -1,8 +1,16 @@
 from pymongo import MongoClient
+from flask import json
+from math import floor
+from time import time
+
+def current_milli_time():
+    return floor(time() * 1000)
 
 client = MongoClient("mongodb+srv://admin:admin@db.ekcwb.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
 profiles = client.db.profiles
 
+
+print('connected to db')
 
 def createUser(username, userMail):
 	profiles.insert_one({'username' : username, 'mail' : userMail})
@@ -25,3 +33,45 @@ def getData(user):
 		username = user
 		userMail = profiles.find_one({'username' : user})['mail']
 	return username, userMail
+
+def createNote(username):
+	userNotes = client.notes[username]
+	noteid = str(current_milli_time())
+	note = {
+	'username' : username,
+	'note' : "", # maybe different type here
+	'noteid' : noteid
+	}
+	userNotes.insert_one(note)
+	return noteid
+
+def deleteNote(username, noteid):
+	userNotes = client.notes[username]
+	note = {
+	'username' : username,
+	'noteid' : noteid
+	}
+	note = userNotes.find_one(note)
+	if not note:
+		return json.dumps({'success' : False, 'error' : 'note does not exist'})
+	userNotes.delete_one(note)
+	return json.dumps({'success' : True})
+
+def modifyNote(username, noteid, newNote):
+	userNotes = client.notes[username]
+	note = userNotes.find_one({'noteid' : noteid})
+	if not note:
+		return json.dumps({'sucess' : False, 'error' : 'note does not exist'})
+	userNotes.delete_one(note)
+	note = {
+	'username' : username,
+	'note' : newNote,
+	'noteid' : noteid
+	}
+	userNotes.insert_one(note)
+	return json.dumps({'sucess' : True})
+
+def getNotes(username):
+	userNotes = client.notes[username]
+	return userNotes.find({'note' : {'$exists' : True}})
+
