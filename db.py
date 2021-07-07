@@ -40,7 +40,9 @@ def createNote(username):
 	note = {
 	'username' : username,
 	'note' : "", # maybe different type here
-	'noteid' : noteid
+	'noteid' : noteid,
+	'title' : 'Empty note',
+	'accessUsers' : []
 	}
 	userNotes.insert_one(note)
 	return noteid
@@ -57,17 +59,37 @@ def deleteNote(username, noteid):
 	userNotes.delete_one(note)
 	return json.dumps({'success' : True})
 
-def modifyNote(username, noteid, newNote):
+def modifyNote(username, noteid, newNote, newTitle):
 	userNotes = client.notes[username]
 	note = userNotes.find_one({'noteid' : noteid})
 	if not note:
 		return json.dumps({'sucess' : False, 'error' : 'note does not exist'})
 	userNotes.delete_one(note)
-	note = {
-	'username' : username,
-	'note' : newNote,
-	'noteid' : noteid
-	}
+	note.note = newNote
+	note.title = newTitle
+	# note = {
+	# 'username' : username,
+	# 'note' : newNote,
+	# 'noteid' : noteid,
+	# 'title' : newTitle
+	# }
+	userNotes.insert_one(note)
+	return json.dumps({'sucess' : True})
+
+def modifyNoteAccess(username, noteid, newAccessUsers):
+	userNotes = client.notes[username]
+	note = userNotes.find_one({'noteid' : noteid})
+	if not note:
+		return json.dumps({'sucess' : False, 'error' : 'note does not exist'})
+	userNotes.delete_one(note)
+
+	# note = {
+	# 'username' : username,
+	# 'note' : newNote,
+	# 'noteid' : noteid,
+	# 'title' : newTitle
+	# }
+	note.accessUsers = newAccessUsers
 	userNotes.insert_one(note)
 	return json.dumps({'sucess' : True})
 

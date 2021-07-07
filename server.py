@@ -94,8 +94,9 @@ def modifyNote():
 
         username = request.json['username']
         noteid = request.json['noteid']
-        newNote = request.json['newNote']        
-        return db.modifyNote(username, noteid, newNote)
+        newNote = request.json['newNote'] 
+        newTitle = request.json['newTitle']        
+        return db.modifyNote(username, noteid, newNote, newTitle)
     return {'success': False, 'error': 'wrong method'}
 
 @app.route('/getNotes', methods=['GET', 'POST'])
@@ -108,6 +109,21 @@ def getNotes():
         username = request.json['username']
         notes = db.getNotes(username)
         response = json.dumps({"success" : True, "notes" : notes})
+        return response
+    return {'success': False, 'error': 'wrong method'}
+
+@app.route('/modifyNoteAccess', methods=['GET', 'POST'])
+def modifyNoteAccess():
+    if request.method == 'POST':
+        headChecker = validateHeader(request)
+        if headChecker:
+            return headChecker
+
+        username = request.json['username']
+        noteid = request.json['noteid']
+        accessUsers = request.json['accessUsers'] # @TODO: MAYBE CHANGE TYPE TO ARRAY
+
+        response = db.modifyNoteAccess(username, noteid, accessUsers)
         return response
     return {'success': False, 'error': 'wrong method'}
 
