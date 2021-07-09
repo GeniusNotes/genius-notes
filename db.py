@@ -39,7 +39,7 @@ def createNote(username):
 	noteid = str(current_milli_time())
 	note = {
 	'username' : username,
-	'note' : "", # maybe different type here
+	'text' : "", # maybe different type here
 	'noteid' : noteid,
 	'title' : 'Empty note',
 	'accessUsers' : []

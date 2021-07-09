@@ -97,6 +97,7 @@ def getNotes():
     username = request.json['username']
     notes = db.getNotes(username)
     notes = [json.dumps(note, default=json_util.default) for note in notes]
+    print(notes)
     response = json.dumps({"success" : True, "notes" : notes})
     return response
 
