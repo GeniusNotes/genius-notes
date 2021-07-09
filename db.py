@@ -59,21 +59,22 @@ def deleteNote(username, noteid):
 	userNotes.delete_one(note)
 	return json.dumps({'success' : True})
 
-def modifyNote(username, noteid, newNote, newTitle):
+def modifyNote(username, noteid, text, newTitle):
 	userNotes = client.notes[username]
 	note = userNotes.find_one({'noteid' : noteid})
 	if not note:
 		return json.dumps({'sucess' : False, 'error' : 'note does not exist'})
-	userNotes.delete_one(note)
-	note.note = newNote
-	note.title = newTitle
+	userNotes.update_one(note, {'$set': {'text' : text, 'title': newTitle}})
+	# userNotes.delete_one(note)
+	# note.note = text
+	# note.title = newTitle
 	# note = {
 	# 'username' : username,
-	# 'note' : newNote,
+	# 'note' : text,
 	# 'noteid' : noteid,
 	# 'title' : newTitle
 	# }
-	userNotes.insert_one(note)
+	# userNotes.insert_one(note)
 	return json.dumps({'sucess' : True})
 
 def modifyNoteAccess(username, noteid, newAccessUsers):
@@ -81,19 +82,20 @@ def modifyNoteAccess(username, noteid, newAccessUsers):
 	note = userNotes.find_one({'noteid' : noteid})
 	if not note:
 		return json.dumps({'sucess' : False, 'error' : 'note does not exist'})
-	userNotes.delete_one(note)
+	userNotes.update_one(note, {'$set': {'accessUsers' : newAccessUsers}})
+	# userNotes.delete_one(note)
 
 	# note = {
 	# 'username' : username,
-	# 'note' : newNote,
+	# 'note' : text,
 	# 'noteid' : noteid,
 	# 'title' : newTitle
 	# }
-	note.accessUsers = newAccessUsers
-	userNotes.insert_one(note)
+	# note.accessUsers = newAccessUsers
+	# userNotes.insert_one(note)
 	return json.dumps({'sucess' : True})
 
 def getNotes(username):
 	userNotes = client.notes[username]
-	return userNotes.find({'note' : {'$exists' : True}})
+	return userNotes.find({'text' : {'$exists' : True}})
 

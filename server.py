@@ -2,6 +2,7 @@ from flask import Flask, request, json
 from flask_mail import Message, Mail
 from emailFunctions import configureEmail, createMessage
 import db, utilities
+from bson import json_util # to json.dump and array
 
 app = Flask(__name__)
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
@@ -14,118 +15,103 @@ mail = configureEmail(app)
 
 
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/login', methods=['POST'])
 def login():
-    if request.method == 'POST':
-        headChecker = validateHeader(request)
-        if headChecker:
-            return headChecker
+    headChecker = validateHeader(request)
+    if headChecker:
+        return headChecker
 
-        user = request.json['user']
-        if not db.userExists(user):
-            return {'success': False, 'error' : 'wrong username or email'}
-        username, userMail = db.getData(user)
-        code = send_email(userMail)
-        response = json.dumps({"success" : True, "username" : username, "mail" : userMail, "code" : code })
-        return response
-    return {'success': False, 'error': 'wrong method'}
+    user = request.json['user']
+    if not db.userExists(user):
+        return {'success': False, 'error' : 'wrong username or email'}
+    username, userMail = db.getData(user)
+    code = send_email(userMail)
+    response = json.dumps({"success" : True, "username" : username, "mail" : userMail, "code" : code })
+    return response
 
-@app.route('/register', methods=['GET', 'POST'])
+@app.route('/register', methods=['POST'])
 def register():
-    if request.method == 'POST':
-        headChecker = validateHeader(request)
-        if headChecker:
-            return headChecker
+    headChecker = validateHeader(request)
+    if headChecker:
+        return headChecker
 
-        username = request.json['username']
-        userMail = request.json['userMail']
-        if db.userOccupied(username, userMail):
-            return {'success': False, 'error' : 'this username or email already is registered'}
-        code = send_email(userMail)
-        response = json.dumps({"success": True, "username" : username, "mail" : userMail, "code" : code})
-        return response
-    return {'success': False, 'error': 'wrong method'}
+    username = request.json['username']
+    userMail = request.json['userMail']
+    if db.userOccupied(username, userMail):
+        return {'success': False, 'error' : 'this username or email already is registered'}
+    code = send_email(userMail)
+    response = json.dumps({"success": True, "username" : username, "mail" : userMail, "code" : code})
+    return response
 
-@app.route('/createUser', methods=['GET', 'POST'])
+@app.route('/createUser', methods=['POST'])
 def createUser():
-    if request.method == 'POST':
-        headChecker = validateHeader(request)
-        if headChecker:
-            return headChecker
+    headChecker = validateHeader(request)
+    if headChecker:
+        return headChecker
 
-        username = request.json['username']
-        userMail = request.json['userMail']
-        db.createUser(username, userMail)
-        response = json.dumps({"success" : True})
-        return response
-    return {'success': False, 'error': 'wrong method'}
+    username = request.json['username']
+    userMail = request.json['userMail']
+    db.createUser(username, userMail)
+    response = json.dumps({"success" : True})
+    return response
 
-@app.route('/createNote', methods=['GET', 'POST'])
+@app.route('/createNote', methods=['POST'])
 def createNote():
-    if request.method == 'POST':
-        headChecker = validateHeader(request)
-        if headChecker:
-            return headChecker
+    headChecker = validateHeader(request)
+    if headChecker:
+        return headChecker
 
-        username = request.json['username']
-        noteid = db.createNote(username)
-        response = json.dumps({"success" : True, "noteId" : noteid})
-        return response
-    return {'success': False, 'error': 'wrong method'}
+    username = request.json['username']
+    noteid = db.createNote(username)
+    response = json.dumps({"success" : True, "noteId" : noteid})
+    return response
 
-@app.route('/deleteNote', methods=['GET', 'POST'])
+@app.route('/deleteNote', methods=['POST'])
 def deleteNote():
-    if request.method == 'POST':
-        headChecker = validateHeader(request)
-        if headChecker:
-            return headChecker
+    headChecker = validateHeader(request)
+    if headChecker:
+        return headChecker
 
-        username = request.json['username']
-        noteid = request.json['noteid']
-        return db.deleteNote(username, noteid)
-    return {'success': False, 'error': 'wrong method'}
+    username = request.json['username']
+    noteid = request.json['noteid']
+    return db.deleteNote(username, noteid)
 
-@app.route('/modifyNote', methods=['GET', 'POST'])
+@app.route('/modifyNote', methods=['POST'])
 def modifyNote():
-    if request.method == 'POST':
-        headChecker = validateHeader(request)
-        if headChecker:
-            return headChecker
+    headChecker = validateHeader(request)
+    if headChecker:
+        return headChecker
 
-        username = request.json['username']
-        noteid = request.json['noteid']
-        newNote = request.json['newNote'] 
-        newTitle = request.json['newTitle']        
-        return db.modifyNote(username, noteid, newNote, newTitle)
-    return {'success': False, 'error': 'wrong method'}
+    username = request.json['username']
+    noteid = request.json['noteid']
+    text = request.json['text'] 
+    newTitle = request.json['newTitle']        
+    return db.modifyNote(username, noteid, text, newTitle)
 
-@app.route('/getNotes', methods=['GET', 'POST'])
+@app.route('/getNotes', methods=['POST'])
 def getNotes():
-    if request.method == 'POST':
-        headChecker = validateHeader(request)
-        if headChecker:
-            return headChecker
+    headChecker = validateHeader(request)
+    if headChecker:
+        return headChecker
 
-        username = request.json['username']
-        notes = db.getNotes(username)
-        response = json.dumps({"success" : True, "notes" : notes})
-        return response
-    return {'success': False, 'error': 'wrong method'}
+    username = request.json['username']
+    notes = db.getNotes(username)
+    notes = [json.dumps(note, default=json_util.default) for note in notes]
+    response = json.dumps({"success" : True, "notes" : notes})
+    return response
 
-@app.route('/modifyNoteAccess', methods=['GET', 'POST'])
+@app.route('/modifyNoteAccess', methods=['POST'])
 def modifyNoteAccess():
-    if request.method == 'POST':
-        headChecker = validateHeader(request)
-        if headChecker:
-            return headChecker
+    headChecker = validateHeader(request)
+    if headChecker:
+        return headChecker
 
-        username = request.json['username']
-        noteid = request.json['noteid']
-        accessUsers = request.json['accessUsers'] # @TODO: MAYBE CHANGE TYPE TO ARRAY
+    username = request.json['username']
+    noteid = request.json['noteid']
+    accessUsers = request.json['accessUsers']
 
-        response = db.modifyNoteAccess(username, noteid, accessUsers)
-        return response
-    return {'success': False, 'error': 'wrong method'}
+    response = db.modifyNoteAccess(username, noteid, accessUsers)
+    return response
 
 
 def send_email(toMail):
