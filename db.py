@@ -95,6 +95,38 @@ def modifyNoteAccess(username, noteid, newAccessUsers):
 	# userNotes.insert_one(note)
 	return json.dumps({'sucess' : True})
 
+def getNoteAccessUsers(username, noteid):
+	userNotes = client.notes[username]
+	note = userNotes.find_one({'noteid' : noteid})
+	if not note:
+		return json.dumps({'sucess' : False, 'error' : 'note does not exist'})
+	return json.dumps({'accessUsers' : note.accessUsers, 'sucess' : True})
+
+def addNoteAccessUser(username, noteid, accessUser):
+	userNotes = client.notes[username]
+	note = userNotes.find_one({'noteid' : noteid})
+	if not note:
+		return json.dumps({'sucess' : False, 'error' : 'note does not exist'})
+	accessUsers = note.accessUsers
+	if accessUser not in accessUsers:
+		accessUsers.append(accessUser)
+	userNotes.update_one(note, {'$set': {'accessUsers' : accessUsers}})
+	return json.dumps({'sucess' : True})
+
+def removeNoteAccessUser(username, noteid, accessUser):
+	userNotes = client.notes[username]
+	note = userNotes.find_one({'noteid' : noteid})
+	if not note:
+		return json.dumps({'sucess' : False, 'error' : 'note does not exist'})
+	accessUsers = note.accessUsers
+	if accessUser in accessUsers:
+		accessUsers.remove(accessUser)
+	else:
+		return json.dumps({'sucess' : False})
+	
+	userNotes.update_one(note, {'$set': {'accessUsers' : accessUsers}})
+	return json.dumps({'sucess' : True})
+
 def getNotes(username):
 	userNotes = client.notes[username]
 	return userNotes.find({'text' : {'$exists' : True}})

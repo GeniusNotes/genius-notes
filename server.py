@@ -114,6 +114,47 @@ def modifyNoteAccess():
     response = db.modifyNoteAccess(username, noteid, accessUsers)
     return response
 
+@app.route('/modifyNoteAccess', methods=['POST'])
+def modifyNoteAccess():
+    headChecker = validateHeader(request)
+    if headChecker:
+        return headChecker
+
+    username = request.json['username']
+    noteid = request.json['noteid']
+    accessUsers = request.json['accessUsers']
+
+    response = db.modifyNoteAccess(username, noteid, accessUsers)
+    return response
+
+@app.route('/getNoteAccessUsers/<username>/<noteid>', methods=['POST'])
+def getNoteAccessUsers(username, noteid):
+    headChecker = validateHeader(request)
+    if headChecker:
+        return headChecker
+
+    response = db.getNoteAccessUsers(username, noteid)
+    return response
+
+@app.route('/addNoteAccessUser/<username>/<noteid>', methods=['POST'])
+def addNoteAccessUser(username, noteid):
+    headChecker = validateHeader(request)
+    if headChecker:
+        return headChecker
+
+    accessUser = request.json['accessUser']
+    response = db.addNoteAccessUser(username, noteid, accessUser)
+    return response
+
+@app.route('/removeNoteAccessUser/<username>/<noteid>', methods=['POST'])
+def removeNoteAccessUser(username, noteid):
+    headChecker = validateHeader(request)
+    if headChecker:
+        return headChecker
+
+    accessUser = request.json['accessUser']
+    response = db.removeNoteAccessUser(username, noteid, accessUser)
+    return response
 
 def send_email(toMail):
     codeLength = 6
