@@ -97,7 +97,6 @@ def getNotes():
     username = request.json['username']
     notes = db.getNotes(username)
     notes = [json.dumps(note, default=json_util.default) for note in notes]
-    print(notes)
     response = json.dumps({"success" : True, "notes" : notes})
     return response
 
@@ -114,18 +113,6 @@ def modifyNoteAccess():
     response = db.modifyNoteAccess(username, noteid, accessUsers)
     return response
 
-@app.route('/modifyNoteAccess', methods=['POST'])
-def modifyNoteAccess():
-    headChecker = validateHeader(request)
-    if headChecker:
-        return headChecker
-
-    username = request.json['username']
-    noteid = request.json['noteid']
-    accessUsers = request.json['accessUsers']
-
-    response = db.modifyNoteAccess(username, noteid, accessUsers)
-    return response
 
 @app.route('/getNoteAccessUsers/<username>/<noteid>', methods=['POST'])
 def getNoteAccessUsers(username, noteid):
