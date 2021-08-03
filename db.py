@@ -2,6 +2,7 @@ from pymongo import MongoClient
 from flask import json
 from math import floor
 from time import time
+from bson import json_util
 
 def current_milli_time():
     return floor(time() * 1000)
@@ -106,6 +107,20 @@ def removeNoteAccessUser(username, noteid, accessUser):
 		return json.dumps({'sucess' : False})
 	userNotes.update_one(note, {'$set': {'accessUsers' : newListAccess}})
 	return json.dumps({'sucess' : True})
+
+def otherPermittedNotes(username):
+	notes = client.notes
+	accessNotes = []
+	for userNote in notes.list_collection_names():
+		userNotes = client.notes[userNote]
+		notesOfUser = userNotes.find({})
+		for note in notesOfUser:
+			if note['username'] == username:
+				continue
+			if username in note['accessUsers']:
+				accessNotes.append(note)
+	accessNotesJson = [json.dumps(note, default=json_util.default) for note in accessNotes]
+	return json.dumps({'sucess' : True, 'accessNotes' : accessNotesJson})
 
 def getNotes(username):
 	userNotes = client.notes[username]

@@ -143,6 +143,15 @@ def removeNoteAccessUser(username, noteid):
     response = db.removeNoteAccessUser(username, noteid, accessUser)
     return response
 
+@app.route('/otherPermittedNotes/<username>', methods=['POST'])
+def otherPermittedNotes(username):
+    headChecker = validateHeader(request)
+    if headChecker:
+        return headChecker
+
+    response = db.otherPermittedNotes(username)
+    return response
+
 def send_email(toMail):
     codeLength = 6
     code = utilities.getCode(codeLength)
